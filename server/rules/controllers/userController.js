@@ -27,6 +27,19 @@ const validateParams = (params) => {
   return Object.values(params).every((param) => param !== undefined && param !== '');
 };
 
+const generateToken = (username, secret) =>{
+  const tokenPayload = {
+    username,
+    role: "user"
+  }
+
+  const options = {
+    expiresIn: '3h',
+  };
+
+  return jwt.sign(tokenPayload,  secret, options);
+}
+
 const userController = {
       createUser: async (req, res, db) => {
         try {
@@ -76,7 +89,8 @@ const userController = {
                 return;
               }
               const userId = this.lastID;
-              const token = jwt.sign({ username: username }, process.env.JWT_SECRET);
+              
+              const token = generateToken(username, jwtSecret);
               res.status(201).json({message: 'User successfully created!', userId, token: token});
               console.log('User successfully created. ID: ', userId);
             });
@@ -89,4 +103,4 @@ const userController = {
     };
     
 
-module.exports = userController;
+module.exports = userController
