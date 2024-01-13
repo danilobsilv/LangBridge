@@ -23,6 +23,10 @@ const checkUnder100YearsOld = (birthdate) => {
   return ageDifference < 100;
 };
 
+const checkUserId = (userId) => {
+  return userId && !isNaN(userId) && userId > 0;
+};
+
 const validateParams = (params) => {
   return Object.values(params).every((param) => param !== undefined && param !== '');
 };
@@ -63,8 +67,7 @@ const userController = {
       db.get(userEmailExistsQuery, email, (error, row) => {
         if (error) {
           console.error('Error when checking the user email: ', error.message);
-          res.status(500).json({Error: 'Error checking the user email!'});
-          return;
+          return res.status(500).json({Error: 'Error checking the user email!'});
         }
 
         if (row) {
@@ -81,8 +84,7 @@ const userController = {
         db.run(insertQuery, params, function(error) {
           if (error) {
             console.error('Error when creating the user: ', error.message);
-            res.status(500).json({Error: 'Error creating the user!'});
-            return;
+            return res.status(500).json({Error: 'Error creating the user!'});
           }
           const userId = this.lastID;
 
@@ -93,45 +95,74 @@ const userController = {
             maxAge: 3 * 60 * 60 * 1000,
           });
 
-          res.status(201).json({message: 'User successfully created!', userId: userId, token: token});
           console.log('User successfully created. ID: ', userId);
+          return res.status(201).json({message: 'User successfully created!', userId: userId, token: token});
         });
       });
     } catch (error) {
       console.log('ERROR:', error);
-      res.status(500).json({Error: 'Error creating user ' + error.message});
+      return res.status(500).json({Error: 'Error creating user ' + error.message});
     }
   },
 
-  getAllUsers: async(req, res, db) =>{
-    try{
+  getAllUsers: async (req, res, db) =>{
+    try {
       const page = req.query.page || 1;
       const limit = req.query.limit || 10;
       const offset = (page - 1) * limit;
 
       const getAllQuery = `
       SELECT * FROM User LIMIT ? OFFSET ?
-      `
+      `;
 
       db.all(getAllQuery, [limit, offset], (error, users) => {
-        if (error){
-          console.error("Erro: erro na condicional do db all: " + error.message);
-          res.status(500).json({error: error.message});
+        if (error) {
+          console.error('Erro: erro na condicional do db all: ' + error.message);
+          return res.status(500).json({error: error.message});
         }
 
-        if (!users || users.length === 0){
-          res.status(200).send([], {message: "No users found!"});
+        if (!users || users.length === 0) {
+          console.error('Erro: erro na verificação de usuários: sem users');
+          return res.status(200).send([], {message: 'No users found!'});
+        } else {
+          return res.status(200).send(users);
         }
-        else{
-          res.status(200).send(users);
+      });
+    } catch (error) {
+      console.error('Erro:  erro no catch do getAllUsers:  ' + error.message);
+      return res.status(500).json({error: error.message});
+    }
+  },
+
+  getUserById: async (req, res, db)=>{
+    try {
+      const getUserByIdQuery = `
+      SELECT * FROM User WHERE userId = ?
+      `;
+      const userId = req.params.userId;
+      const isValidUserId = checkUserId(userId);
+
+      if (!isValidUserId) {
+        console.error('Erro: userId não válido');
+        return res.status(400).send({erro: 'Invalid user ID!'});
+      }
+
+      db.get(getUserByIdQuery, [userId], (error, user) => {
+        if (error) {
+          console.error('Erro: erro no condicional do db get ' + error.message);
+          return res.status(500).json({error: error.message});
         }
-      })
+        if (!user) {
+          console.error('Erro: erro no condicional do db get: usuário não encontrado');
+          return res.status(404).json({error: 'User not found!'});
+        }
+        return res.status(200).json({user: user});
+      });
+    } catch (error) {
+      console.error('Erro: erro do bloco catch:  ' + error.message);
+      res.status(500).json({Error: error.message});
     }
-    catch(error){
-      console.error("Erro:  erro no catch do getAllUsers:  " + error.message);
-      res.status(500).json({error: error.message});
-    }
-  }
+  },
 };
 
 module.exports = userController;
