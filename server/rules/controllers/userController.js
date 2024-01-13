@@ -102,7 +102,36 @@ const userController = {
       res.status(500).json({Error: 'Error creating user ' + error.message});
     }
   },
-};
 
+  getAllUsers: async(req, res, db) =>{
+    try{
+      const page = req.query.page || 1;
+      const limit = req.query.limit || 10;
+      const offset = (page - 1) * limit;
+
+      const getAllQuery = `
+      SELECT * FROM User LIMIT ? OFFSET ?
+      `
+
+      db.all(getAllQuery, [limit, offset], (error, users) => {
+        if (error){
+          console.error("Erro: erro na condicional do db all: " + error.message);
+          res.status(500).json({error: error.message});
+        }
+
+        if (!users || users.length === 0){
+          res.status(200).send([], {message: "No users found!"});
+        }
+        else{
+          res.status(200).send(users);
+        }
+      })
+    }
+    catch(error){
+      console.error("Erro:  erro no catch do getAllUsers:  " + error.message);
+      res.status(500).json({error: error.message});
+    }
+  }
+};
 
 module.exports = userController;
