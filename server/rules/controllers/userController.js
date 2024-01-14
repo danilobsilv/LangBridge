@@ -50,17 +50,17 @@ const userController = {
       const isValidAge = checkUnder100YearsOld(birthDate);
 
       if (!isValidParams) {
-        return res.status(400).send({Error: 'Missing required parameters!'});
+        return res.status(400).json({Error: 'Missing required parameters!'});
       }
 
       if (!isValidEmail) {
         console.error('Formato de email inválido');
-        return res.status(400).send({Error: 'Invalid email format!'});
+        return res.status(400).json({Error: 'Invalid email format!'});
       }
 
       if (!isValidAge) {
         console.error('Passou de 100 anos de idade');
-        return res.status(400).send({Error: 'Age exceeded 100 years!'});
+        return res.status(400).json({Error: 'Age exceeded 100 years!'});
       }
 
       const userEmailExistsQuery = `SELECT * FROM User WHERE email = ?`;
@@ -72,7 +72,7 @@ const userController = {
 
         if (row) {
           console.error('Email já existe');
-          return res.status(400).send({error: 'Email already exists!'});
+          return res.status(400).json({error: 'Email already exists!'});
         }
 
         const hashedPassword = bcrypt.hash(password, 10);
@@ -123,9 +123,9 @@ const userController = {
 
         if (!users || users.length === 0) {
           console.error('Erro: erro na verificação de usuários: sem users');
-          return res.status(200).send([], {message: 'No users found!'});
+          return res.status(200).json([], {message: 'No users found!'});
         } else {
-          return res.status(200).send(users);
+          return res.status(200).json(users);
         }
       });
     } catch (error) {
@@ -144,7 +144,7 @@ const userController = {
 
       if (!isValidUserId) {
         console.error('Erro: userId não válido');
-        return res.status(400).send({erro: 'Invalid user ID!'});
+        return res.status(400).json({erro: 'Invalid user ID!'});
       }
 
       db.get(getUserByIdQuery, [userId], (error, user) => {
@@ -160,9 +160,84 @@ const userController = {
       });
     } catch (error) {
       console.error('Erro: erro do bloco catch:  ' + error.message);
-      res.status(500).json({Error: error.message});
+      return res.status(500).json({Error: error.message});
     }
   },
+
+  updateUserById: async(req, res, db) => {
+    try{
+      const userId = req.params.userId
+      const {fullName, username, email, password, preferredLanguage, birthDate} = req.body;
+
+      let params = [];
+      let fieldsToUpdate = [];
+
+      if (fullName){
+        fieldsToUpdate.push("FullName = ?");
+        params.push(fullName);
+      }
+
+      if (username){
+        fieldsToUpdate.push("Username = ?");
+        params.push(username);
+      }
+
+      if (isValidEmail(email)){
+        fieldsToUpdate.push("Email = ?");
+        params.push(email);
+      }
+
+      if (password){
+        fieldsToUpdate.push("Password = ?");
+        params.push(password);
+      }
+
+      if (preferredLanguage){
+        fieldsToUpdate.push("PreferredLanguage = ?");
+        params.push(preferredLanguage);
+      }
+
+      if (isValidAge(birthDate)){
+        fieldsToUpdate.push("BirthDate = ?");
+        params.push(birthDate);
+      }
+
+      if (!fieldsToUpdate.length) {
+        return res.status(400).json({message: "No fields to update were provided."});
+      }
+
+      if (!isValidUserId(userId)){
+        return res.status(400).json({ message: "Invalid userId" });
+      }
+      
+      params.push(userId);
+
+      const updateUserQuery = `
+        Update User
+        SET ${fieldsToUpdate.join(', ')}
+        WHERE userId = ?
+        `;
+
+        
+        
+      db.run(updateUserQuery, params, function(error){
+        if (error){
+          console.error("Erro: Erro na condicional do db run: " + error.message);
+          return res.status(500).json({message: error.message});
+        }
+
+        if(this.changes === 0){
+          return res.status(304).json({message: "No changes were made to the user data."});
+        }
+
+        return res.status(200).json({message: "User updated successfully!"});
+      })
+    }
+    catch(error){
+      console.error("Erro: Erro no catch: " + error.message);
+      res.status(500).json({message: error.message});
+    }
+  }
 };
 
 module.exports = userController;
