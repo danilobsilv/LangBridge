@@ -13,7 +13,7 @@ db.serialize(() => {
         text_id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT
       )`);
-
+    
   db.run(`CREATE TABLE IF NOT EXISTS User (
         userId INTEGER PRIMARY KEY AUTOINCREMENT,
         fullName TEXT,
@@ -32,6 +32,7 @@ db.serialize(() => {
         source_language_id INTEGER,
         target_language_id INTEGER,
         request_date TEXT,
+        translation_tone TEXT,
         FOREIGN KEY(user_id) REFERENCES User(userId),
         FOREIGN KEY(text_id) REFERENCES Text(text_id),
         FOREIGN KEY(source_language_id) REFERENCES Language(language_id),
