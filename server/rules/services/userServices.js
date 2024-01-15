@@ -1,55 +1,22 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const userUtils = require("./utils/userUtils");
 require('dotenv').config();
 
 const jwtSecret = process.env.JWT_SECRET;
 
-const checkEmailFormat = (email) => {
-      const emailRegex = /^[a-zA-Z0-9._-]+@(gmail|hotmail)\.com$/;
-      return emailRegex.test(email);
-    };
     
-    const checkUnder100YearsOld = (birthdate) => {
-      const currentDate = new Date();
+const validateParams = (params) => {
+  return Object.values(params).every((param) => param !== undefined && param !== '');
+  };
     
-      // p aceitar diferentes tipos de entrada
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(birthdate)) {
-        birthdate = birthdate.split('/').reverse().join('-');
-      }
-    
-      const providedDate = new Date(birthdate);
-    
-      const ageDifference = currentDate.getFullYear() - providedDate.getFullYear();
-      return ageDifference < 100;
-    };
-    
-    const checkUserId = (userId) => {
-      return userId && !isNaN(userId) && userId > 0;
-    };
-    
-    const validateParams = (params) => {
-      return Object.values(params).every((param) => param !== undefined && param !== '');
-    };
-    
-    const generateToken = (username, secret) =>{
-      const tokenPayload = {
-        username,
-        role: 'user',
-      };
-    
-      return jwt.sign(tokenPayload, secret);
-    };
-    
-
-
 const userServices = {
       createUser: async (req, res, db) => {
         try {
           const {fullName, username, email, password, preferredLanguage, birthDate} = req.body;
     
           const isValidParams = validateParams({fullName, username, email, password, preferredLanguage, birthDate});
-          const isValidEmail = checkEmailFormat(email);
-          const isValidAge = checkUnder100YearsOld(birthDate);
+          const isValidEmail = userUtils.checkEmailFormat(email);
+          const isValidAge = userUtils.checkUnder100YearsOld(birthDate);
     
           if (!isValidParams) {
             return res.status(400).json({Error: 'Missing required parameters!'});
@@ -90,7 +57,7 @@ const userServices = {
               }
               const userId = this.lastID;
     
-              const token = generateToken(username, jwtSecret);
+              const token = userUtils.generateUserToken(username, jwtSecret);
     
               res.cookie('token', token, {
                 httpOnly: true,
@@ -142,7 +109,7 @@ const userServices = {
           SELECT * FROM User WHERE userId = ?
           `;
           const userId = req.params.userId;
-          const isValidUserId = checkUserId(userId);
+          const isValidUserId = userUtils.checkUserId(userId);
     
           if (!isValidUserId) {
             console.error('Erro: userId não válido');
@@ -189,7 +156,7 @@ const userServices = {
           const setStatements = validFields.map((field) => `${field.name} = ?`);
           const params = validFields.map((field) => field.value);
     
-          if (!checkUserId(userId)) {
+          if (!userUtils.checkUserId(userId)) {
             return res.status(400).json({message: 'Invalid userId'});
           }
     
@@ -225,6 +192,11 @@ const userServices = {
           const deleteUserQuery = `
             DELETE FROM User WHERE userId = ?
           `;
+
+          if (!userUtils.checkUserId(userId)){
+            return res.status(400).json({message: 'Invalid userId'});
+          }
+
           db.run(deleteUserQuery, [userId], function(error) {
             if (error) {
               console.log('Erro: Erro no console no condicional do db run: ' + error.message);
