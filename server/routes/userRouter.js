@@ -9,6 +9,7 @@ router.route("/")
 
 router.route("/:userId")
       .get((req, res) => userController.getUserById(req, res, db))
-      .put((req, res) => userController.updateUserById(req, res, db));
+      .put((req, res) => userController.updateUserById(req, res, db))
+      .delete((req, res) => userController.DeleteUserById(req, res, db));
 
 module.exports = router;
