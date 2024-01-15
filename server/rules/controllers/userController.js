@@ -164,80 +164,70 @@ const userController = {
     }
   },
 
-  updateUserById: async(req, res, db) => {
-    try{
-      const userId = req.params.userId
-      const {fullName, username, email, password, preferredLanguage, birthDate} = req.body;
+  updateUserById: async (req, res, db) => {
+  try {
+    const userId = req.params.userId;
+    const { fullName, username, email, password, preferredLanguage, birthDate } = req.body;
 
-      let params = [];
-      let fieldsToUpdate = [];
+    const fieldsToUpdate = [
+      { name: 'FullName', value: fullName },
+      { name: 'Username', value: username },
+      { name: 'Email', value: email, isValid: checkEmailFormat },
+      { name: 'Password', value: password ? bcrypt.hashSync(password, 10) : undefined },
+      { name: 'PreferredLanguage', value: preferredLanguage },
+      { name: 'BirthDate', value: birthDate, isValid: checkUnder100YearsOld },
+    ];
 
-      if (fullName){
-        fieldsToUpdate.push("FullName = ?");
-        params.push(fullName);
-      }
+    const validFields = fieldsToUpdate.filter(field => field.value !== undefined && (!field.isValid || field.isValid(field.value)));
 
-      if (username){
-        fieldsToUpdate.push("Username = ?");
-        params.push(username);
-      }
-
-      if (isValidEmail(email)){
-        fieldsToUpdate.push("Email = ?");
-        params.push(email);
-      }
-
-      if (password){
-        fieldsToUpdate.push("Password = ?");
-        params.push(password);
-      }
-
-      if (preferredLanguage){
-        fieldsToUpdate.push("PreferredLanguage = ?");
-        params.push(preferredLanguage);
-      }
-
-      if (isValidAge(birthDate)){
-        fieldsToUpdate.push("BirthDate = ?");
-        params.push(birthDate);
-      }
-
-      if (!fieldsToUpdate.length) {
-        return res.status(400).json({message: "No fields to update were provided."});
-      }
-
-      if (!isValidUserId(userId)){
-        return res.status(400).json({ message: "Invalid userId" });
-      }
-      
-      params.push(userId);
-
-      const updateUserQuery = `
-        Update User
-        SET ${fieldsToUpdate.join(', ')}
-        WHERE userId = ?
-        `;
-
-        
-        
-      db.run(updateUserQuery, params, function(error){
-        if (error){
-          console.error("Erro: Erro na condicional do db run: " + error.message);
-          return res.status(500).json({message: error.message});
-        }
-
-        if(this.changes === 0){
-          return res.status(304).json({message: "No changes were made to the user data."});
-        }
-
-        return res.status(200).json({message: "User updated successfully!"});
-      })
+    if (validFields.length === 0) {
+      return res.status(400).json({ message: "No valid fields to update were provided." });
     }
-    catch(error){
-      console.error("Erro: Erro no catch: " + error.message);
-      res.status(500).json({message: error.message});
+
+    const setStatements = validFields.map(field => `${field.name} = ?`);
+    const params = validFields.map(field => field.value);
+
+    if (!checkUserId(userId)) {
+      return res.status(400).json({ message: "Invalid userId" });
     }
+
+    params.push(userId);
+
+    const updateUserQuery = `
+      UPDATE User
+      SET ${setStatements.join(', ')}
+      WHERE userId = ?
+    `;
+
+    db.run(updateUserQuery, params, function (error) {
+      if (error) {
+        console.error("Erro: Erro na execução da consulta de atualização do usuário: " + error.message);
+        return res.status(500).json({ message: error.message });
+      }
+
+      if (this.changes === 0) {
+        return res.status(304).json({ message: "No changes were made to the user data." });
+      }
+
+      return res.status(200).json({ message: "User updated successfully!" });
+    });
+  } catch (error) {
+    console.error("Erro: Erro na função updateUserById: " + error.message);
+    res.status(500).json({ message: error.message });
   }
+},
+
+DeleteUserById: async(req, res, db) =>{
+  try{
+
+  }
+  catch(error){
+    
+  }
+}
+
+  
+   
 };
 
 module.exports = userController;
