@@ -165,69 +165,81 @@ const userController = {
   },
 
   updateUserById: async (req, res, db) => {
-  try {
-    const userId = req.params.userId;
-    const { fullName, username, email, password, preferredLanguage, birthDate } = req.body;
+    try {
+      const userId = req.params.userId;
+      const {fullName, username, email, password, preferredLanguage, birthDate} = req.body;
 
-    const fieldsToUpdate = [
-      { name: 'FullName', value: fullName },
-      { name: 'Username', value: username },
-      { name: 'Email', value: email, isValid: checkEmailFormat },
-      { name: 'Password', value: password ? bcrypt.hashSync(password, 10) : undefined },
-      { name: 'PreferredLanguage', value: preferredLanguage },
-      { name: 'BirthDate', value: birthDate, isValid: checkUnder100YearsOld },
-    ];
+      const fieldsToUpdate = [
+        {name: 'FullName', value: fullName},
+        {name: 'Username', value: username},
+        {name: 'Email', value: email, isValid: checkEmailFormat},
+        {name: 'Password', value: password ? bcrypt.hashSync(password, 10) : undefined},
+        {name: 'PreferredLanguage', value: preferredLanguage},
+        {name: 'BirthDate', value: birthDate, isValid: checkUnder100YearsOld},
+      ];
 
-    const validFields = fieldsToUpdate.filter(field => field.value !== undefined && (!field.isValid || field.isValid(field.value)));
+      const validFields = fieldsToUpdate.filter((field) => field.value !== undefined && (!field.isValid || field.isValid(field.value)));
 
-    if (validFields.length === 0) {
-      return res.status(400).json({ message: "No valid fields to update were provided." });
-    }
+      if (validFields.length === 0) {
+        return res.status(400).json({message: 'No valid fields to update were provided.'});
+      }
 
-    const setStatements = validFields.map(field => `${field.name} = ?`);
-    const params = validFields.map(field => field.value);
+      const setStatements = validFields.map((field) => `${field.name} = ?`);
+      const params = validFields.map((field) => field.value);
 
-    if (!checkUserId(userId)) {
-      return res.status(400).json({ message: "Invalid userId" });
-    }
+      if (!checkUserId(userId)) {
+        return res.status(400).json({message: 'Invalid userId'});
+      }
 
-    params.push(userId);
+      params.push(userId);
 
-    const updateUserQuery = `
+      const updateUserQuery = `
       UPDATE User
       SET ${setStatements.join(', ')}
       WHERE userId = ?
     `;
 
-    db.run(updateUserQuery, params, function (error) {
-      if (error) {
-        console.error("Erro: Erro na execução da consulta de atualização do usuário: " + error.message);
-        return res.status(500).json({ message: error.message });
-      }
+      db.run(updateUserQuery, params, function(error) {
+        if (error) {
+          console.error('Erro: Erro na execução da consulta de atualização do usuário: ' + error.message);
+          return res.status(500).json({message: error.message});
+        }
 
-      if (this.changes === 0) {
-        return res.status(304).json({ message: "No changes were made to the user data." });
-      }
+        if (this.changes === 0) {
+          return res.status(304).json({message: 'No changes were made to the user data.'});
+        }
 
-      return res.status(200).json({ message: "User updated successfully!" });
-    });
-  } catch (error) {
-    console.error("Erro: Erro na função updateUserById: " + error.message);
-    res.status(500).json({ message: error.message });
-  }
-},
+        return res.status(200).json({message: 'User updated successfully!'});
+      });
+    } catch (error) {
+      console.error('Erro: Erro na função updateUserById: ' + error.message);
+      res.status(500).json({message: error.message});
+    }
+  },
 
-DeleteUserById: async(req, res, db) =>{
-  try{
+  deleteUserById: async (req, res, db) =>{
+    try {
+      const userId = req.params.userId;
+      const deleteUserQuery = `
+        DELETE FROM User WHERE userId = ?
+      `;
+      db.run(deleteUserQuery, [userId], function(error) {
+        if (error) {
+          console.error('Erro: Erro no console no condicional do db run: ' + error.message);
+          return res.status(500).json({message: 'Error while deleting user.'});
+        }
 
-  }
-  catch(error){
-    
-  }
-}
+        if (this.changes === 0) {
+          return res.status(404).json({message: 'User not found.'});
+        }
 
-  
-   
+        return res.status(200).json({message: 'User deleted successfully!'});
+      });
+    } catch (error) {
+      console.error('Erro: Erro no bloco do catch: ' + error.message);
+      res.status(500).json({message: 'Error while deleting the user.'});
+    }
+  },
 };
 
 module.exports = userController;
