@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const userUtils = require("./utils/userUtils");
+const userUtils = require("../utils/userUtils");
 require('dotenv').config();
 
 const jwtSecret = process.env.JWT_SECRET;
