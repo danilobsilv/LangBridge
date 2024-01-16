@@ -1,14 +1,6 @@
 const db = require("./dbConnection");
 
 db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS Language (
-        language_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        language_name TEXT,
-        language_code TEXT,
-        country TEXT,
-        alphabet TEXT
-      )`);
-
   db.run(`CREATE TABLE IF NOT EXISTS Text (
         text_id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT
