@@ -5,7 +5,7 @@ const userRouter = require("./userRouter");
 router.use("/user", userRouter);
 
 // Translation Requests Router
-const tranlationRequetsRouter = require("./translationRequestRouter");
-router.use("/translation-request", tranlationRequetsRouter);
+const textRouter = require("./textRouter");
+router.use("/text-request", textRouter);
 
 module.exports = router;
