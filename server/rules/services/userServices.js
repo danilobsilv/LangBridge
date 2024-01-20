@@ -1,7 +1,7 @@
-const CreateUserDTO = require('../../dtos/userDTOs/createUserDTO');
-const GetUserDTO = require('../../dtos/userDTOs/getUserDTO');
-const UpdateUserDTO = require('../../dtos/userDTOs/updateUserDTO');
-const DeleteUserDTO = require('../../dtos/userDTOs/deleteUserDTO');
+const CreateUserDTO = require('../../dtos/userDTO/createUserDTO');
+const GetUserDTO = require('../../dtos/userDTO/getUserDTO');
+const UpdateUserDTO = require('../../dtos/userDTO/updateUserDTO');
+const DeleteUserDTO = require('../../dtos/userDTO/deleteUserDTO');
 const userUtils = require('../utils/userUtils');
 const bcrypt = require('bcrypt');
 
