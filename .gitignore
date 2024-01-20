@@ -109,6 +109,8 @@ dist
 
 # Serverless directories
 .serverless/
+to_do.txt
+functional_requirements.txt
 
 # FuseBox cache
 .fusebox/
@@ -129,6 +131,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-to_do.txt
 LangBridge.db
-functional_requirements.txt
+tables.js
