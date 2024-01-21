@@ -132,4 +132,4 @@ functional_requirements.txt
 .pnp.*
 
 LangBridge.db
-tables.js
+dbTables.js
