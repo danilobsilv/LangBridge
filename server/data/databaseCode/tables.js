@@ -3,7 +3,11 @@ const db = require("./dbConnection");
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS Text (
         text_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        content TEXT
+        user_id INTEGER,
+        translationRequest_id INTEGER,
+        content TEXT,
+        FOREIGN KEY (user_id) REFERENCES User(userId)
+        FOREIGN KEY (translationRequest_id) REFERENCES TranslationRequest(request_id)
       )`);
     
   db.run(`CREATE TABLE IF NOT EXISTS User (
