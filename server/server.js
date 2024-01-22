@@ -1,38 +1,27 @@
+require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-
-
 const app = express();
+const cors = require('cors');
+const routes = require('./routes/router');
+const errorHandler = require('./middleware/errorHandler');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
+
 app.use(cors());
+app.use(helmet()); // to avoid web vulnerabilities (http header config)
 app.use(express.json());
 
-
-const routes = require('./routes/router');
 app.use('/api', routes);
 
+app.use(errorHandler);
 
-app.use((err, req, res, next) => {
-  let statusCode = err.status || 500;
-  let errorMessage = '';
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max:100  // to limit each ip to a maximum of 100 requests per 15 minutes
+}))
 
-  if (err.name === 'ValidationError') {
-    statusCode = 404;
-    errorMessage = 'Validation Error';
-  } else if (err.name === 'UnauthorizedError') {
-    statusCode = 401;
-    errorMessage = 'Acess denied ';
-  } else {
-    errorMessage = 'Internal Server Error';
-  }
-
-  res.status(statusCode).json({
-    error:
-            {message:
-                  errorMessage}});
-},
-);
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
   console.log(`Listening on PORT ${PORT}`);
 },
