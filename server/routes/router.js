@@ -6,6 +6,6 @@ router.use("/user", userRouter);
 
 // Translation Requests Router
 const textRouter = require("./textRouter");
-router.use("/text-request", textRouter);
+router.use("/text", textRouter);
 
 module.exports = router;
