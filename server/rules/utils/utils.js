@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const userUtils = {
+const utils = {
       checkEmailFormat: (email) => {
             const emailRegex = /^[a-zA-Z0-9._-]+@(gmail|hotmail)\.com$/;
             return emailRegex.test(email);
@@ -34,4 +34,4 @@ const userUtils = {
       }
 }
 
-module.exports = userUtils;
+module.exports = utils;
