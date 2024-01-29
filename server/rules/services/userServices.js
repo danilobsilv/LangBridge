@@ -2,7 +2,7 @@ const CreateUserDTO = require('../../dtos/userDTO/createUserDTO');
 const GetUserDTO = require('../../dtos/userDTO/getUserDTO');
 const UpdateUserDTO = require('../../dtos/userDTO/updateUserDTO');
 const DeleteUserDTO = require('../../dtos/userDTO/deleteUserDTO');
-const userUtils = require('../utils/userUtils');
+const utils = require('../utils/utils');
 const bcrypt = require('bcrypt');
 
 require('dotenv').config();
@@ -30,8 +30,8 @@ const userServices = {
 
 
       const isValidParams = validateParams(userDTO);
-      const isValidEmail = userUtils.checkEmailFormat(userDTO.email);
-      const isValidAge = userUtils.checkUnder100YearsOld(userDTO.birthDate);
+      const isValidEmail = utils.checkEmailFormat(userDTO.email);
+      const isValidAge = utils.checkUnder100YearsOld(userDTO.birthDate);
 
       if (!isValidParams) {
         return res.status(400).json({Error: 'Missing required parameters!'});
@@ -79,7 +79,7 @@ const userServices = {
           }
           const userId = this.lastID;
 
-          const token = userUtils.generateUserToken(userDTO.username, jwtSecret);
+          const token = utils.generateUserToken(userDTO.username, jwtSecret);
 
           res.cookie('token', token, {
             httpOnly: true,
@@ -137,7 +137,7 @@ const userServices = {
             SELECT * FROM User WHERE userId = ?
           `;
 
-      const isValidUserId = userUtils.checkUserId(userId.userId);
+      const isValidUserId = utils.checkUserId(userId.userId);
 
       if (!isValidUserId) {
         console.error('Erro: userId não válido');
@@ -177,10 +177,10 @@ const userServices = {
       const fieldsToUpdate = [
         {name: 'FullName', value: userDTO.fullName},
         {name: 'Username', value: userDTO.username},
-        {name: 'Email', value: userDTO.email, isValid: userUtils.checkEmailFormat},
+        {name: 'Email', value: userDTO.email, isValid: utils.checkEmailFormat},
         {name: 'Password', value: userDTO.password ? bcrypt.hashSync(userDTO.password, 10) : undefined},
         {name: 'PreferredLanguage', value: userDTO.preferredLanguage},
-        {name: 'BirthDate', value: userDTO.birthDate, isValid: userUtils.checkUnder100YearsOld},
+        {name: 'BirthDate', value: userDTO.birthDate, isValid: utils.checkUnder100YearsOld},
       ];
 
       const validFields = fieldsToUpdate.filter((field) => field.value !== undefined && (!field.isValid || field.isValid(field.value)));
@@ -192,7 +192,7 @@ const userServices = {
       const setStatements = validFields.map((field) => `${field.name} = ?`);
       const params = validFields.map((field) => field.value);
 
-      if (!userUtils.checkUserId(userId.userId)) {
+      if (!utils.checkUserId(userId.userId)) {
         return res.status(400).json({message: 'Invalid userId'});
       }
 
@@ -232,7 +232,7 @@ const userServices = {
             DELETE FROM User WHERE userId = ?
           `;
 
-      if (!userUtils.checkUserId(userId.userId)) {
+      if (!utils.checkUserId(userId.userId)) {
         return res.status(400).json({message: 'Invalid userId'});
       }
 
