@@ -137,7 +137,7 @@ const userServices = {
             SELECT * FROM User WHERE userId = ?
           `;
 
-      const isValidUserId = utils.checkUserId(userId.userId);
+      const isValidUserId = utils.checkId(userId.userId);
 
       if (!isValidUserId) {
         console.error('Erro: userId não válido');
@@ -192,7 +192,7 @@ const userServices = {
       const setStatements = validFields.map((field) => `${field.name} = ?`);
       const params = validFields.map((field) => field.value);
 
-      if (!utils.checkUserId(userId.userId)) {
+      if (!utils.checkId(userId.userId)) {
         return res.status(400).json({message: 'Invalid userId'});
       }
 
@@ -232,7 +232,7 @@ const userServices = {
             DELETE FROM User WHERE userId = ?
           `;
 
-      if (!utils.checkUserId(userId.userId)) {
+      if (!utils.checkId(userId.userId)) {
         return res.status(400).json({message: 'Invalid userId'});
       }
 
