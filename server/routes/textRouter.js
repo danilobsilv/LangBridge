@@ -7,4 +7,6 @@ router.route("/:userId/:translationRequestId")
 
 router.route("/").get((req, res, next) => textController.getAllText(req, res, database, next));
 
+router.route("/:textId").get((req, res, next) => textController.getTextById(req, res, database, next));
+
 module.exports = router;
