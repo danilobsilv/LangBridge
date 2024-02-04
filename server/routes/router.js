@@ -1,11 +1,15 @@
 const router = require("express").Router();
+const userRouter = require("./userRouter");
+const textRouter = require("./textRouter");
+const translationRequestRouter = require("./translationRequestRouter");
 
 // Users Router
-const userRouter = require("./userRouter");
 router.use("/user", userRouter);
 
-// Translation Requests Router
-const textRouter = require("./textRouter");
+// Text Router
 router.use("/text", textRouter);
+
+// Translation Request Router
+router.use("/translationreq", translationRequestRouter);
 
 module.exports = router;
