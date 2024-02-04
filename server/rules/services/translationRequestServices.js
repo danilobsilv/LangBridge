@@ -1,4 +1,5 @@
 const CreateTranslationRequestDTO = require('../../dtos/translationRequestDTO/createTranslationRequestDTO');
+const GetTranslationRequestDTO = require('../../dtos/translationRequestDTO/getTranslactionRequestDTO');
 const utils = require('../utils/utils');
 const {CustomError} = require('../../middleware/errorHandler');
 
@@ -66,6 +67,68 @@ const translationRequestService = {
     } catch (error) {
       console.error('Erro no catch --> ' + error.message);
       next(error);
+    }
+  },
+
+  getAllTranslationRequests: async (req, res, next, db) =>{
+    try {
+      const page = req.query.page || 1;
+      const limit = req.query.limit || 10;
+      const offset = (page - 1) * limit;
+
+      const getAllTranslationRequestsQuery = `
+            SELECT * FROM TranslationRequest LIMIT ? OFFSET ? 
+            `;
+
+      await db.all(getAllTranslationRequestsQuery, [limit, offset], function(error, requests) {
+        if (error) {
+          console.error('erro no condicional do bd run: ' + error.message);
+          next(new CustomError(error.message, 500));
+        }
+        // console.log("request ao bd: ", requests);
+        if (!requests || requests.length === 0) {
+          console.error('erro: sem requests disponíveis');
+          next(new CustomError('No requests were found.', 404));
+        } else {
+          return res.status(200).json(requests);
+        }
+      });
+    } catch (error) {
+      console.error('Erro no catch -->' + error.message);
+      next(error);
+    }
+  },
+
+  getTranslationRequestById: async (req, res, next, db) => {
+    try {
+      const requestId = new GetTranslationRequestDTO(req.params.requestId);
+
+      const isValidRequestId = utils.checkId(requestId.requestId);
+
+      const getTranslationRequestByIdQuery = `
+            SELECT * FROM TranslationRequest WHERE request_id      = ?
+            `;
+      if (!isValidRequestId) {
+        console.error('erro na validação do request id - request id inválido');
+        next(new CustomError('Invalid request Id.', 400));
+      }
+
+      await db.get(getTranslationRequestByIdQuery, [requestId.requestId], function(error, request) {
+        if (error) {
+          console.error('erro no condicional do get --> ' + error.message);
+          next(new CustomError(error.message, 400));
+        }
+
+        if (!request) {
+          console.error('erro no !request. Request não encontrado.');
+          next(new CustomError('Request not found.', 404));
+        } else {
+          return res.status(200).json({request: request});
+        }
+      });
+    } catch (error) {
+      console.error('Erro no catch --> ' + error.message);
+      next(CustomError(error.message, 500));
     }
   },
 };
