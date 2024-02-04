@@ -10,6 +10,7 @@ router.use("/user", userRouter);
 router.use("/text", textRouter);
 
 // Translation Request Router
-router.use("/translationreq", translationRequestRouter);
+router.use("/translationrequest", translationRequestRouter);
+
 
 module.exports = router;
