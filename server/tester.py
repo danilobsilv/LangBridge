@@ -1,5 +1,8 @@
 from test.user_test.user_request_test import UserRequestTests
 from test.text_test.text_request_test import TextRequestTests
+from test.translation_request_test.translation_request_test import TranslationRequestTest
+
+from random import randint
 
 if __name__ == "__main__":
       
@@ -23,4 +26,24 @@ if __name__ == "__main__":
       put_request = urt.send_put_request(urt.put_endpoint, "server/test/user_test/post_user.json")
       delete_request = urt.send_delete_request(urt.delete_endpoint)
       urt.interpret_response(put_request)
+      
+
+      Translation Requests
+      
+      userId = randint(1,100)
+      textId = randint(1,100)
+
+      post_translation_request_endpoint = f"http://localhost:3000/api/translationrequest/{userId}/{textId}"
+
+      get_all_translation_request_endpoint = "http://localhost:3000/api/translationrequest"
+
+      get_translation_request_by_id_endpoint = f"http://localhost:3000/api/translationrequest/{textId}"
+
+      trrt = TranslationRequestTest()
+
+      post_response = trrt.send_post_request(post_translation_request_endpoint, "server/test/translation_request_test/post_translation_request.json")
+      get_all_response = trrt.send_get_request(get_all_translation_request_endpoint)
+      get_request_by_id = trrt.send_get_request(get_translation_request_by_id_endpoint)
+
+      trrt.interpret_response(get_request_by_id) 
       """
