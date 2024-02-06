@@ -86,6 +86,10 @@ class Test:
 
       @staticmethod
       def interpret_response(response):
-            json_content = response.json()
-            formatted_json = json.dumps(json_content, indent=2)
-            print(formatted_json)
+            try:
+                  json_content = response.json()
+                  formatted_json = json.dumps(json_content, indent=2)
+                  print(formatted_json)
+            except json.JSONDecodeError:
+                  print(f"Error: Response is not a valid JSON. Content: {response.text}")
+
