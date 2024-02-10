@@ -20,8 +20,8 @@ const utils = {
             return ageDifference < 100;
           },
 
-      checkUserId: (userId) => {
-            return userId && !isNaN(userId) && userId > 0;
+      checkId: (id) => {
+            return id && !isNaN(id) && id > 0;
           },
 
       generateUserToken: (username, secret) =>{
