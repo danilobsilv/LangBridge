@@ -8,6 +8,7 @@ const translationResponseRouter = require("./translationResponseRouter");
 router.use("/user", userRouter);
 
 // Text Router
+// Text Router
 router.use("/text", textRouter);
 
 // Translation Request Router
