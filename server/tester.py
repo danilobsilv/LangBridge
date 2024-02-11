@@ -1,6 +1,7 @@
 from test.user_test.user_request_test import UserRequestTests
 from test.text_test.text_request_test import TextRequestTests
 from test.translation_request_test.translation_request_test import TranslationRequestTest
+from test.translation_response_test.translation_response_test import TranslationResponseTest
 
 from random import randint
 
@@ -39,11 +40,31 @@ if __name__ == "__main__":
 
       get_translation_request_by_id_endpoint = f"http://localhost:3000/api/translationrequest/{textId}"
 
-      trrt = TranslationRequestTest()
+      trrt = TranslationRequestTest(post_translation_request_endpoint, get_all_translation_request_endpoint, get_translation_request_by_id_endpoint)
 
-      post_response = trrt.send_post_request(post_translation_request_endpoint, "server/test/translation_request_test/post_translation_request.json")
-      get_all_response = trrt.send_get_request(get_all_translation_request_endpoint)
-      get_request_by_id = trrt.send_get_request(get_translation_request_by_id_endpoint)
+      post_response = trrt.send_post_request(trrt.post_endpoint, "server/test/translation_request_test/post_translation_request.json")
+      get_all_response = trrt.send_get_request(trrt.get_endpoint)
+      get_request_by_id = trrt.send_get_request(trrt.get_by_id_endpoint)
 
       trrt.interpret_response(get_request_by_id) 
+      
+      
+      # Translation Responses
+
+      requestId = randint(0,100)
+      
+      post_translation_response_endpoint = f"http://localhost:3000/api/translationresponse/{requestId}"
+
+      get_all_translation_response_endpoint = "http://localhost:3000/api/translationresponse"
+
+      get_translation_response_by_id = f"http://localhost:3000/api/translationresponse/{26}"
+
+      trr = TranslationResponseTest(post_translation_response_endpoint, get_all_translation_response_endpoint, get_translation_response_by_id)
+
+      post_response = trr.send_post_request(trr.post_endpoint, "server/test/translation_response_test/post_translation_response.json")
+      get_all_response = trr.send_get_request(trr.get_endpoint)
+      get_by_id_response = trr.send_get_request(trr.get_by_id_endpoint)
+
+      trr.interpret_response(get_by_id_response)
+      
       """
