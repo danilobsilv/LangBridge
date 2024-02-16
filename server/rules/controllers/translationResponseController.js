@@ -1,4 +1,4 @@
-const translationResponseService = require("../services/translationResponseServices");
+const translationResponseService = require("../services/translation/translationResponseServices");
 
 const translationRequestController = {
       createTranslationResponse: translationResponseService.createTranslationResponse,
