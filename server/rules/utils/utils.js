@@ -31,6 +31,10 @@ const utils = {
             };
           
             return jwt.sign(tokenPayload, secret);
+      },
+
+      checkTranslationContentLength: (text) => {
+            return text.length <= 1000
       }
 }
 
