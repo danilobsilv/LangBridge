@@ -4,7 +4,7 @@ const utils = require('../utils/utils');
 const {CustomError} = require('../../middleware/errorHandler');
 
 const validateParams = (params) => {
-  const requiredFields = ['userId', 'textId', 'sourceLanguage', 'targetLanguage', 'requestDate', 'translationTone'];
+  const requiredFields = ["user_id", "translation_content", "source_language_id", "target_language_id", "request_date"];
 
   return requiredFields.every((field) => params[field] !== undefined && params[field] !== '');
 };
@@ -14,52 +14,51 @@ const translationRequestService = {
   createTranslationRequest: async (req, res, next, db)=>{
     try {
       const requestDTO = new CreateTranslationRequestDTO(
-          req.params.userId,
-          req.params.textId,
-          req.body.sourceLanguage,
-          req.body.targetLanguage,
-          req.body.requestDate,
-          req.body.translationTone,
+          req.params.user_id,
+          req.body.translation_content,
+          req.body.source_language_id,
+          req.body.target_language_id,
+          req.body.request_date
       );
 
       const isValidParams = validateParams(requestDTO);
-      const isValidUserId = utils.checkId(requestDTO.userId);
-      const isValidTextId = utils.checkId(requestDTO.textId);
+      const isValidUserId = utils.checkId(requestDTO.user_id);
+      const isValidTextContent = utils.checkTranslationContentLength(requestDTO.translation_content);
 
       if (!isValidParams) {
         console.error('erro no isValidParams');
-        throw new CustomError('Missing required params.', 400);
+        return next(new CustomError('Missing required params.', 400));
       }
 
       if (!isValidUserId) {
         console.error('erro no isValidUserId');
-        throw new CustomError('Invalid user ID', 400);
+        return next(new CustomError('Invalid user ID', 400));
       }
 
-      if (!isValidTextId) {
-        console.error('erro no isValidTextId');
-        throw new CustomError('Invalid text ID', 400);
+      if (!isValidTextContent){
+        console.error("erro no isValidTextContent");
+        return next(new CustomError("Translation content is over 600 characters.", 400));
       }
+ 
 
       const createTranslationRequestQuery = `
-                        INSERT INTO TranslationRequest (user_id, text_id, source_language_id, target_language_id, request_date, translation_tone) 
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        INSERT INTO TranslationRequest ( user_id, translation_content, source_language_id, target_language_id, request_date) 
+                        VALUES (?, ?, ?, ?, ?)
                   `;
 
       const params = [
-        requestDTO.userId,
-        requestDTO.textId,
-        requestDTO.sourceLanguage,
-        requestDTO.targetLanguage,
-        requestDTO.requestDate,
-        requestDTO.translationTone,
+        requestDTO.user_id,
+        requestDTO.translation_content,
+        requestDTO.source_language_id,
+        requestDTO.target_language_id,
+        requestDTO.request_date
       ];
 
 
       await db.run(createTranslationRequestQuery, params, function(error) {
         if (error) {
           console.error('Error no condicional do db run --> ' + error.message);
-          throw new CustomError(error.message, 500);
+          return next(new CustomError(error.message, 500));
         }
 
         return res.status(200).json({});
