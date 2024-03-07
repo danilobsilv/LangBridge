@@ -2,9 +2,10 @@ const CreateTextDTO = require('../../dtos/textDTO/createTextDTO');
 const getTextDTO = require('../../dtos/textDTO/getTextDTO');
 const utils = require('../utils/utils');
 const {CustomError} = require('../../middleware/errorHandler');
+const { text } = require('express');
 
 const validateParams = (params) => {
-  const requiredFields = ['userId', 'translationRequestId', 'content'];
+  const requiredFields = ["translatedText", "requestId",  "userId"];
   return requiredFields.every((field) => params[field] !== undefined && params[field] !== '');
 };
 
@@ -12,36 +13,41 @@ const validateParams = (params) => {
 const textServices = {
   createText: async (req, res, db, next) => {
     try {
-      const userId = req.params.userId;
-      const translationRequestId = req.params.translationRequestId;
-      const content = req.body.content;
-      const maxTextLength = 600;
 
-      const textDTO = new CreateTextDTO(userId, translationRequestId, content);
+      const textDTO = new CreateTextDTO(
+        req.body.translatedText,
+        req.body.requestId,
+        req.body.userId
+        );
+
 
       const isValidParams = validateParams(textDTO);
-      const isValidUserId = utils.checkId(userId);
+      const isValidUserId = utils.checkId(textDTO.userId);
+      const isValidRequestId = utils.checkId(textDTO.requestId)
 
       if (!isValidParams) {
+        console.error("erro no isvalidparams")
         throw new CustomError('Missing required parameters', 400);
       }
 
       if (!isValidUserId) {
+        console.error("erro no isvaliduserid")
         throw new CustomError('Invalid UserId', 400);
       }
 
-      if ((textDTO.content).length > maxTextLength) {
-        throw new CustomError('Too many characters', 400);
+      if (!isValidRequestId){
+        console.error("erro no isvalidrequestid")
+        next(new CustomError("Invalid Request Id", 400));
       }
-      console.log((textDTO.content).length);
+
       const insertQuery = `
-                INSERT INTO Text (user_id, translationRequest_id, content) VALUES (?, ?, ?)
+                INSERT INTO Text (translated_text, request_id, user_id) VALUES (?, ?, ?)
               `;
 
       const params = [
-        textDTO.userId,
-        textDTO.translationRequestId,
-        textDTO.content,
+        textDTO.translatedText,
+        textDTO.requestId,
+        textDTO.userId  
       ];
 
       await db.run(insertQuery, params, function(error) {
