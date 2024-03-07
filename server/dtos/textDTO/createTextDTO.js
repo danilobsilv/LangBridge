@@ -1,8 +1,8 @@
 class CreateTextDTO {
-      constructor(userId, translationRequestId, content) {
+      constructor(translatedText, requestId, userId) {
+        this.translatedText = translatedText;
+        this.requestId = requestId;
         this.userId = userId;
-        this.translationRequestId = translationRequestId;
-        this.content = content;
       }
     }
     
