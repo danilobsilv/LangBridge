@@ -3,6 +3,7 @@ const GetTranslationRequestDTO = require('../../dtos/translationRequestDTO/getTr
 const utils = require('../utils/utils');
 const {CustomError} = require('../../middleware/errorHandler');
 
+
 const validateParams = (params) => {
   const requiredFields = ["user_id", "translation_content", "source_language_id", "target_language_id", "request_date"];
 
@@ -13,6 +14,7 @@ const validateParams = (params) => {
 const translationRequestService = {
   createTranslationRequest: async (req, res, next, db)=>{
     try {
+
       const requestDTO = new CreateTranslationRequestDTO(
           req.params.user_id,
           req.body.translation_content,
@@ -60,7 +62,7 @@ const translationRequestService = {
           console.error('Error no condicional do db run --> ' + error.message);
           return next(new CustomError(error.message, 500));
         }
-
+          
         return res.status(200).json({});
       });
     } catch (error) {
