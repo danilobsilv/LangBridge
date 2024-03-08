@@ -57,7 +57,7 @@
 
 <h2>Getting Started</h2>
 
-<h3>To get started with LangBridge, please refer to the API Documentation: <a href="LangBridge API Documentation">LangBridge API Documentation</a>
+<h3>To get started with LangBridge, please refer to the API Documentation: <a href="https://documenter.getpostman.com/view/28837141/2sA2xfZtaH">LangBridge API Documentation</a>
 </h3>
 
 <h2>License</h2>
